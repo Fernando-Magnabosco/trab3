@@ -1,0 +1,21 @@
+Com esse index: 
+    CREATE INDEX idx_empregados_dep_id_salario ON empregados(dep_id, salario DESC); 
+    CLUSTER empregados using idx_empregados_dep_id_salario;
+
+As queries melhoraram significativamente;
+
+
+Query 3:
+    A query 3 parou de ordenar as tuplas, pois o index já ordena por salário;
+    A diferença do seq_scan pro idx_scan foi insignificante, acredito que porque a query não tem uma clausula where. Se for filtrar as tuplas, o idx_scan vai ser muito mais rápido;
+
+    Consegui otimizar ainda mais a query 3 trocando de window function para um distinct. O banco parou de fazer um WindowAgg e passou a fazer um Unique;
+
+Query 7:
+    Aqui aconteceu parecido com a query 3, o banco parou de ordenar as tuplas, pois o index já ordena por salário;
+    Assim em vez de usar um hash join, o banco passou a usar um merge left join;
+
+
+Query 9:
+    Aqui aconteceu parecido com a query 3, o banco parou de ordenar as tuplas, pois o index já ordena por salário;
+    Além disso, o banco alterou a ordem do windowAgg, passando a fazer o windowAgg antes de scannear as tuplas, o que é muito mais eficiente; ( em vez de 1 mi, escaneamos 30 tuplas)
